@@ -1,28 +1,16 @@
-//---------------------------------------------------------------
-// Program lab_8d - Architektury Komputerów
-//
-// To compile&link: gcc -O3 -mavx -o lab_8d lab_8d.c avx1.c avx2.c eval_time.o
-// To run:          ./lab_8d
-//
-//---------------------------------------------------------------
+
 
 #include <stdio.h>
 #include <math.h>
-
 #include "eval_time.h"
 
 #define SIZE 1024			//rozmiar glownych macierzy
 
-//#define nb 32				//rozmiar bloku alg. blokowego
 
 static double a[SIZE*SIZE];
-static double at[SIZE*SIZE];
-
 static double b[SIZE*SIZE];
-
 static double c[SIZE*SIZE];
 static double d[SIZE*SIZE];
-
 static double e[SIZE*SIZE];
 
 void dgemm_naive(int,double*,double*,double*);
@@ -51,7 +39,7 @@ for(int z=0;z<5;z++){
 		n = size;
 		f = 2*n*n*n;		//liczba operacji zmiennoprzecinkowych
 
-			for(i=0;i<n;++i)	//wypelnij a i b jakimis wartosciami poczatkowymi
+			for(i=0;i<n;++i)	
 				for (j=0;j<n;++j)
 				{
 				a[j+i*n]=(double)(i+j*n);
