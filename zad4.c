@@ -118,24 +118,24 @@ for(i=0;i<n;i+=4)
 	
 	for(k=0;k<n;++k)
 	{
-	    reg0 +=A[i +k*n]*B[k+j*n];
+	    reg0 +=A[i+k*n]*B[k+j*n];
 	    reg1 +=A[i+1+k*n]*B[k+j*n];
 
 	    reg2 +=A[i+2+k*n]*B[k+j*n];
 	    reg3 +=A[i+3+k*n]*B[k+j*n];
 		
-	    reg4 +=A[i  +k*n]*B[k+(j+1)*n];
+	    reg4 +=A[i+k*n]*B[k+(j+1)*n];
 	    reg5 +=A[i+1+k*n]*B[k+(j+1)*n];
 
 	    reg6 +=A[i+2+k*n]*B[k+(j+1)*n];
 	    reg7 +=A[i+3+k*n]*B[k+(j+1)*n];
 
-	    reg8 +=A[i  +k*n]*B[k+(j+2)*n];
+	    reg8 +=A[i+k*n]*B[k+(j+2)*n];
 	    reg9 +=A[i+1+k*n]*B[k+(j+2)*n];
 	    reg10+=A[i+2+k*n]*B[k+(j+2)*n];
 	    reg11+=A[i+3+k*n]*B[k+(j+2)*n];
 
-	    reg12+=A[i  +k*n]*B[k+(j+3)*n];
+	    reg12+=A[i+k*n]*B[k+(j+3)*n];
 	    reg13+=A[i+1+k*n]*B[k+(j+3)*n];
 	    reg14+=A[i+2+k*n]*B[k+(j+3)*n];
 	    reg15+=A[i+3+k*n]*B[k+(j+3)*n];
