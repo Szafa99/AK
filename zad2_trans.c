@@ -4,7 +4,7 @@
 
 #define SIZE 1024			//rozmiar glownych macierzy
 
-//#define nb 32				//rozmiar bloku alg. blokowego
+
 
 static double a[SIZE*SIZE];
 static double tr_matrix[SIZE*SIZE];
