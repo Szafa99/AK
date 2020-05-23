@@ -36,7 +36,7 @@ int main(void)
 for(int z=0;z<5;z++)
 {
 
-	for( int size = 512; size <= 512; size*=2 ) {
+	for( int size = 256; size <= 256; size*=2 ) {
 		n = size;
 		f = 2*n*n*n;		//liczba operacji zmiennoprzecinkowych
 
@@ -56,7 +56,7 @@ for(int z=0;z<5;z++)
 		dgemm_naive_trans(n,tr_matrix,b,c);
 		read_time(time_tabl);
 		suma_n+=(double)f/time_tabl[1];
-		printf("NAIVE:\tMX_SIZE=%d time = %2.3lf GFLOPS = %.3lf\n", n, time_tabl[1],(double)f/time_tabl[2]/1.0e9 );
+		printf("NAIVE:\tMX_SIZE=%d time = %2.3lf GFLOPS = %.3lf\n", n, time_tabl[1],(double)f/time_tabl[1]/1.0e9 );
 
 
 // //////////////////////////////////// UNROLL4TRANS
@@ -66,7 +66,7 @@ for(int z=0;z<5;z++)
 		dgemm_unroll4_trans(n,tr_matrix,b,d);
 		read_time(time_tabl);
 		suma_un+=(double)f/time_tabl[1];
-		printf("UNROLL:\tMX_SIZE=%d time = %2.3lf GFLOPS = %.3lf\n", n, time_tabl[1],(double)f/time_tabl[2]/1.0e9 );
+		printf("UNROLL:\tMX_SIZE=%d time = %2.3lf GFLOPS = %.3lf\n", n, time_tabl[1],(double)f/time_tabl[1]/1.0e9 );
 		//sprawdzenie czy oba algorytmy daly ten sam wynik
 
 		for (i=0;i<n*n;++i) 
@@ -83,7 +83,7 @@ int count=0;
 				dgemm_blocked_trans(n,tr_matrix,b,e);
 				read_time(time_tabl);
                 suma_b[count++]+=(double)f/time_tabl[1];
-				printf("BLOCKED\tMX_SIZE=%d  BL_SIZE%d time = %2.3lf GFLOPS = %.3lf\n", n, block, time_tabl[1],(double)f/time_tabl[2]/1.0e9 );
+				printf("BLOCKED\tMX_SIZE=%d  BL_SIZE%d time = %2.3lf GFLOPS = %.3lf\n", n, block, time_tabl[1],(double)f/time_tabl[1]/1.0e9 );
 
 		//sprawdzenie czy oba algorytmy daly ten sam wynik
 					for (i=0;i<n*n;++i) 

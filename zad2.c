@@ -51,7 +51,7 @@ for(int z=0;z<5;z++){
 		dgemm_naive(n,a,b,c);
 		read_time(time_tabl);
 		suma_n+=(double)f/time_tabl[1];
-		printf("UNROLL:\tMX_SIZE=%d time = %2.3lf GFLOPS = %.3lf\n", n, time_tabl[1],(double)f/time_tabl[2]/1.0e9 );
+		printf("Naive:\tMX_SIZE=%d time = %2.3lf GFLOPS = %.3lf\n", n, time_tabl[1],(double)f/time_tabl[1]/1.0e9 );
 
 
 //////////////////////////// UNROLL
@@ -59,7 +59,7 @@ for(int z=0;z<5;z++){
 		dgemm_unroll4(n,a,b,d);
 		read_time(time_tabl);
 		suma_un+=(double)f/time_tabl[1];
-		printf("UNROLL:\tMX_SIZE=%d time = %2.3lf GFLOPS = %.3lf\n", n, time_tabl[1],(double)f/time_tabl[2]/1.0e9 );
+		printf("UNROLL:\tMX_SIZE=%d time = %2.3lf GFLOPS = %.3lf\n", n, time_tabl[1],(double)f/time_tabl[1]/1.0e9 );
 
 		//sprawdzenie czy oba algorytmy daly ten sam wynik
 
@@ -75,7 +75,7 @@ int count = 0;
 				dgemm_blocked(n,a,b,e);
 				read_time(time_tabl);
   				suma_b[count++]+=(double)f/time_tabl[1];
-				printf("BLOCKED\tMX_SIZE=%d  BL_SIZE%d time = %2.3lf GFLOPS = %.3lf\n", n, blocksize, time_tabl[1],(double)f/time_tabl[2]/1.0e9 );
+				printf("BLOCKED\tMX_SIZE=%d  BL_SIZE%d time = %2.3lf GFLOPS = %.3lf\n", n, blocksize, time_tabl[1],(double)f/time_tabl[1]/1.0e9 );
 
 		
 				// sprawdzenie czy oba algorytmy daly ten sam wynik
