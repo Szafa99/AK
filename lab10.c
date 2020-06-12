@@ -13,14 +13,17 @@ static double d[SIZE*SIZE];
 static double e[SIZE*SIZE];
 static double f[SIZE*SIZE];
 static double g[SIZE*SIZE];
+static double h[SIZE*SIZE];
 
 void naive_avx(int n, double* A, double* B, double* C);
-void unroll(int,double*,double*,double*);
-void unroll4(int,double*,double*,double*);
-void unroll8(int n, double* A, double* B, double* C);
+void unroll_avx(int,double*,double*,double*);
+void unroll4_avx(int,double*,double*,double*);
+void unroll8_avx(int n, double* A, double* B, double* C);
 
-void block(int,int,int,int,int,double*,double*,double*);
-void dgemm_blocked(int,int, double*,double*,double*);
+void dgemm_blocked_sse(int n,int blocksize, double* A, double* B, double* C,void(*blockptr)(int n,int blocksize, int bi, int bj, int bk, double *A, double *B, double *C));
+void block_sse(int,int,int,int,int,double*,double*,double*);
+void unroll_block_sse(int,int,int,int,int,double*,double*,double*);
+
 
 void showresult();
 
@@ -29,6 +32,7 @@ static double suma_u[4];
 static double suma_u4[4];
 static double suma_u8[4];
 static double suma_bl[4][5];
+static double suma_ubl[4][5];
 
   int blocksize;
 
@@ -64,7 +68,7 @@ for(int z=0;z<5;z++){
 
 	//////////////////// UNROLL
 			init_time();
-			unroll(n,a,b,d);
+			unroll_avx(n,a,b,d);
 			read_time(time_tabl);
 			suma_u[count]+=(double)ff/time_tabl[1];
 			printf("Unroll: MX_SIZE=%d\t time = %2.3lf GFLOPS = %.3lf\n", n, time_tabl[1],(double)ff/time_tabl[1]/1.0e9 );
@@ -75,7 +79,7 @@ for(int z=0;z<5;z++){
 
 	//////////////////// UNROLL_4
 			init_time();
-			unroll4(n,a,b,e);
+			unroll4_avx(n,a,b,e);
 			read_time(time_tabl);
 			suma_u4[count]+=(double)ff/time_tabl[1];
 			printf("Unroll4: MX_SIZE=%d\t time = %2.3lf GFLOPS = %.3lf\n", n, time_tabl[1],(double)ff/time_tabl[1]/1.0e9 );
@@ -86,7 +90,7 @@ for(int z=0;z<5;z++){
 
 							//////////////////// UNROLL_8
 			init_time();
-			unroll8(n,a,b,f);
+			unroll8_avx(n,a,b,f);
 			read_time(time_tabl);
 			suma_u8[count]+=(double)ff/time_tabl[1];
 			printf("Unroll8: MX_SIZE=%d\t time = %2.3lf GFLOPS = %.3lf\n", n, time_tabl[1],(double)ff/time_tabl[1]/1.0e9 );
@@ -97,21 +101,38 @@ for(int z=0;z<5;z++){
 						
 
 	///////////////////////////////////// blocked
+	int countbl=0;
 	for( int blocksize=4;blocksize<=128;  blocksize*=2){
 					init_time();
-					dgemm_blocked(n,blocksize, a,b,g);
+					dgemm_blocked_sse(n,blocksize, a,b,g,block_sse);
 					read_time(time_tabl);
-					suma_bl[count][blocksize/4-1]+=(double)ff/time_tabl[1];
+					suma_bl[count][countbl++]+=(double)ff/time_tabl[1];
 			printf("Blocked: MX_SIZE:%d \t BLOCK_SIZE:%d time = %2.3lf GFLOPS = %.3lf\n", n, blocksize, time_tabl[1],(double)ff/time_tabl[1]/1.0e9 );
 					// sprawdzenie czy oba algorytmy daly ten sam wynik
 					for (i=0;i<n*n;++i) 
 						if (fabs(f[i]-g[i])>1.0e-9) {printf("Error !\n"); goto rtrn;}
 					
-			if(blocksize%4!=0){printf("Error !\n"); goto rtrn;}
-			if(blocksize==128)count++;
 			for (i=0;i<n*n;++i)g[i] = 0.0; 
 	
 	}
+	
+	//////////////////////////////////////// unroll_blocked
+			 countbl=0;
+				for( int blocksize=4;blocksize<=128;  blocksize*=2){
+					init_time();
+					dgemm_blocked_sse(n,blocksize, a,b,h,unroll_block_sse);
+					read_time(time_tabl);
+					suma_ubl[count][countbl++]+=(double)ff/time_tabl[1]/1.0e9;
+			printf("Blocked: MX_SIZE:%d \t BLOCK_SIZE:%d time = %2.3lf GFLOPS = %.3lf\n", n, blocksize, time_tabl[1],(double)ff/time_tabl[1]/1.0e9 );
+					//sprawdzenie czy oba algorytmy daly ten sam wynik
+					for (i=0;i<n*n;++i) 
+						if (fabs(f[i]-g[i])>1.0e-9) {printf("Error !\n"); goto rtrn;}
+					
+			if(blocksize==128)count++;
+			for (i=0;i<n*n;++i)h[i] = 0.0; 
+	
+	}
+
 
 
 
@@ -145,7 +166,7 @@ for(register int i=0;i<n;i+=4)
     }
 }
 
-void unroll(int n, double* A, double* B, double* C)
+void unroll_avx(int n, double* A, double* B, double* C)
 {
 register int i,j,k;
 __m256d reg0,reg1,reg2;
@@ -168,7 +189,7 @@ for(i=0;i<n;i+=8)
 
 
 
-void unroll4(int n, double* A, double* B, double* C)
+void unroll4_avx(int n, double* A, double* B, double* C)
 {
 register int i,j,k;
 __m256d reg0,reg1,reg2,reg3,reg4;
@@ -196,7 +217,7 @@ for(i=0;i<n;i+=16)
     }
 }
 
-void unroll8(int n, double* A, double* B, double* C)
+void unroll8_avx(int n, double* A, double* B, double* C)
 {
 register int i,j,k;
 __m256d reg0,reg1,reg2,reg3,reg4,reg5,reg6,reg7,reg8;
@@ -240,17 +261,17 @@ for(i=0;i<n;i+=32)
 
 
 
-void dgemm_blocked(int n,int blocksize, double* A, double* B, double* C)
+void dgemm_blocked_sse(int n,int blocksize, double* A, double* B, double* C,void(*blockptr)(int ,int , int , int , int , double* , double* , double*) )
 {
 register int bi,bj,bk;
 
 for(bi=0;bi<n;bi+=blocksize)
     for(bj=0;bj<n;bj+=blocksize)
 	for(bk=0;bk<n;bk+=blocksize)
-	    block(n ,blocksize, bi,bj,bk,A,B,C);
+	    blockptr(n ,blocksize, bi,bj,bk,A,B,C);
 }
 
-void block(int n,int blocksize, int bi, int bj, int bk, double *A, double *B, double *C)
+void block_sse(int n,int blocksize, int bi, int bj, int bk, double *A, double *B, double *C)
 {
 
 __m128d cij;
@@ -271,6 +292,36 @@ for(i=bi;i<bi+blocksize;i+=2)
 
 
 
+void unroll_block_sse(int n,int blocksize, int bi, int bj, int bk, double *A, double *B, double *C)
+{
+
+__m128d cv,reg0,reg1;
+register int i,j,k;
+
+
+for(i=bi;i<bi+blocksize;i+=4)
+    for(j=bj;j<bj+blocksize;++j)
+    {
+	reg0=_mm_load_pd(C+i+0+j*n);
+	reg1=_mm_load_pd(C+i+2+j*n);
+
+	for(k=bk;k<bk+blocksize;++k)
+        cv = _mm_load1_pd(B+k+j*n);
+        
+		reg0 = _mm_add_pd(reg0,_mm_mul_pd(_mm_load_pd(A+n*k+0+i), cv));
+        reg1 = _mm_add_pd(reg1,_mm_mul_pd(_mm_load_pd(A+n*k+2+i), cv));
+
+	_mm_store_pd(C+i+0+j*n,cv);
+	_mm_store_pd(C+i+2+j*n,cv);
+    }
+}
+
+
+
+
+
+
+
 void showresult(){
 int matrixsize=256;
 printf("\n\n---------WYNIK KONCOWY------------\n\n");
@@ -283,7 +334,8 @@ printf("Srednia GFPS UNROLL4 = %.3lf\n", suma_u4[i]/5.0e9 );
 printf("Srednia GFPS UNROLL8 = %.3lf\n", suma_u8[i]/5.0e9 );
 	int bl=2;
 for(int b=0;b<5;b++){
-	printf("Srednia GFPS BLOCKED blok:%d = %.3lf\n",bl*=2, suma_bl[i][b]/5.0e9 );
+	printf("Srednia GFPS BLOCKED blok:%d = %.3lf\n",bl, suma_bl[i][b]/5.0e9 );
+	printf("Srednia GFPS unroll_BLOCKED blok:%d = %.3lf\n",bl*=2, suma_ubl[i][b]/5 );
 	}
 }
 }
