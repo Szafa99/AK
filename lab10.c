@@ -3,7 +3,7 @@
 #include "eval_time.h"
 #include <x86intrin.h>
 
-#define SIZE 1024			//rozmiar glownych macierzy
+#define SIZE 2048			
 
 
 static double a[SIZE*SIZE];
@@ -41,10 +41,10 @@ int main(void)
 
 for(int z=0;z<5;z++){
 	count=0;	
-	for(int size = 128; size <= 1024; size *=2 ) {
+	for(int size = 512; size <= 2048; size *=2 ) {
 		
 		n = size;
-		ff = 2*n*n*n;		//liczba operacji zmiennoprzecinkowych
+		ff = 2*n*n*n;		
 
 			for(i=0;i<n;++i)	
 				for (j=0;j<n;++j)
@@ -272,9 +272,9 @@ for(i=bi;i<bi+blocksize;i+=2)
 
 
 void showresult(){
-int matrixsize=64;
+int matrixsize=256;
 printf("\n\n---------WYNIK KONCOWY------------\n\n");
-for(int i=0;i<4;i++){
+for(int i=0;i<3;i++){
 	printf("\nMatrixsize: %dx%d\n\n",matrixsize,matrixsize*=2);
 
 printf("Srednia GFPS naive = %.3lf\n", suma_n[i]/5.0e9);
